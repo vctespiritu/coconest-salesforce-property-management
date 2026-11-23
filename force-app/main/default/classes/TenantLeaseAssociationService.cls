@@ -4,7 +4,6 @@
  */
 public with sharing class TenantLeaseAssociationService {
     
-    
     /**
      * Description: prevents a lease from having no primary tenant as a primary tenant per lease is required
      * @param newRecords the new records being triggered
@@ -14,9 +13,19 @@ public with sharing class TenantLeaseAssociationService {
 
         Set<Id> leaseIds = new Set<Id>();
 
-        for (Tenant_Lease_Association__c tla : newRecords) {
-            if (tla.Lease__c != null) {
-                leaseIds.add(tla.Lease__c);
+        if (newRecords != null) {
+            for (Tenant_Lease_Association__c tla : newRecords) {
+                if (tla.Lease__c != null) {
+                    leaseIds.add(tla.Lease__c);
+                }
+            }
+        }        
+
+        if(oldRecords!= null){
+            for (Tenant_Lease_Association__c tla : oldRecords) {
+                if (tla.Lease__c != null) {
+                    leaseIds.add(tla.Lease__c);
+                }
             }
         }
 
@@ -33,7 +42,6 @@ public with sharing class TenantLeaseAssociationService {
         List<Tenant_Lease_Association__c> existingTlas = TenantLeaseAssociationSelector.getTenantLeaseAssocByLeaseId(new List<Id>(leaseIds));
 
         for (Tenant_Lease_Association__c tla : existingTlas) {
-
             if (tla.Is_Primary_Tenant__c) {
                 primaryCountByLeaseId.put(tla.Lease__c, primaryCountByLeaseId.get(tla.Lease__c) + 1);
             }
@@ -48,7 +56,7 @@ public with sharing class TenantLeaseAssociationService {
                 }
 
             }
-        } else {
+        } else if(newRecords != null && oldRecords != null){
 
             Map<Id, Tenant_Lease_Association__c> oldRecordsById = new Map<Id, Tenant_Lease_Association__c>(oldRecords);
 
@@ -66,22 +74,30 @@ public with sharing class TenantLeaseAssociationService {
 
                 } else if (!oldTla.Is_Primary_Tenant__c && newTla.Is_Primary_Tenant__c) {
 
-                    primaryCountByLeaseId.put(
-                        newTla.Lease__c,
-                        primaryCountByLeaseId.get(newTla.Lease__c) + 1
-                    );
+                    primaryCountByLeaseId.put(newTla.Lease__c, primaryCountByLeaseId.get(newTla.Lease__c) + 1);
 
+                }
+            }
+        } else if (newRecords == null){
+            for (Tenant_Lease_Association__c tla : oldRecords) {
+                if (tla.Lease__c != null && tla.Is_Primary_Tenant__c) {
+                    primaryCountByLeaseId.put(tla.Lease__c, primaryCountByLeaseId.get(tla.Lease__c) - 1);
                 }
             }
         }
 
-        for (Tenant_Lease_Association__c tla : newRecords) {
-
-            if (tla.Lease__c != null && primaryCountByLeaseId.get(tla.Lease__c) == 0) {
-                tla.addError('A lease must have a primary tenant.');
+        if (newRecords != null) {
+            for (Tenant_Lease_Association__c tla : newRecords) {
+                if (tla.Lease__c != null && primaryCountByLeaseId.get(tla.Lease__c) == 0) {
+                    tla.addError(TenantLeaseAssociationConstant.PRIMARY_TENANT_ERROR);
+                }
             }
-
+        } else {
+            for (Tenant_Lease_Association__c tla : oldRecords) {
+                if (tla.Lease__c != null && primaryCountByLeaseId.get(tla.Lease__c) == 0) {
+                    tla.addError(TenantLeaseAssociationConstant.PRIMARY_TENANT_ERROR);
+                }
+            }
         }
     }
-
 }

@@ -25,7 +25,9 @@ public with sharing class TenantLeaseAssociationTriggerHandler implements Trigge
      * Description: Handles before delete events
      * @param oldRecords the record/s in their previous state
      */
-    public void beforeDelete(Map<Id, SObject> oldRecords){}
+    public void beforeDelete(Map<Id, SObject> oldRecords){
+        TenantLeaseAssociationService.preventALeaseWithNoPrimaryTenant(null, oldRecords.values());
+    }
 
     /**
      * Description: Handles after insert events
