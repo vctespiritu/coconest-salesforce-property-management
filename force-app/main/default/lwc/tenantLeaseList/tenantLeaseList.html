@@ -1,0 +1,61 @@
+<template>
+  <lightning-card>
+
+    <div slot="title" class="slds-grid slds-grid_vertical-align-center">
+        <lightning-icon
+            icon-name="action:new_note"
+            size="small"
+            class="slds-m-right_small">
+        </lightning-icon>
+        <span>Lease Summary</span>
+    </div>   
+    
+    <template lwc:if={isLoading}>
+        <lightning-spinner
+            alternative-text="Loading leases"
+            size="medium">
+        </lightning-spinner>
+    </template>
+
+    <template lwc:if={errorMessage}>
+
+        <div class="slds-p-around_medium slds-text-color_error" role="alert">
+            {errorMessage}
+        </div>
+
+    </template>
+
+    <template lwc:elseif={hasLeases}>
+    
+        <template lwc:if={isDesktop}> 
+
+            <lightning-datatable
+                    key-field="Id"
+                    data={leases}
+                    columns={columns}
+                    column-widths-mode="auto"
+                    min-column-width="100"
+                    max-column-width="300"
+                    show-row-number-column
+                    hide-checkbox-column>
+            </lightning-datatable>
+
+        </template>
+
+        <template lwc:else>
+            <!-- Mobile friendly custom layout. 
+                TODO: Future design out of scope right now  -->
+        </template>
+
+    </template>
+
+    <template lwc:else>
+
+        <div class="slds-p-around_medium">
+            No leases found for this tenant.
+        </div>
+
+    </template>
+
+</lightning-card>
+</template>

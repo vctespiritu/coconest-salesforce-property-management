@@ -71,14 +71,6 @@
     </types>
     -->
 
-    <!-- Flows -->
-    <!--
-    <types>
-        <members>Your_Flow_Name</members>
-        <name>Flow</name>
-    </types>
-    -->
-
     <!-- Tabs -->
     <types>
         <members>Property__c</members>
